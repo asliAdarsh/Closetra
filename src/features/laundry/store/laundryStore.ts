@@ -9,7 +9,9 @@ interface LaundryState {
 
     fetchData: () => void;
     addLaundry: (date: string, time: string, day: string, note: string, clothIds: string[]) => void;
+    updateLaundry: (id: string, date: string, time: string, day: string, note: string, clothIds: string[]) => void;
     markReturned: (id: string) => void;
+    deleteLaundry: (id: string) => void;
     getLaundryItems: (id: string) => LaundryItem[];
 }
 
@@ -34,8 +36,18 @@ export const useLaundryStore = create<LaundryState>((set, get) => ({
         get().fetchData();
     },
 
+    updateLaundry: (id, date, time, day, note, clothIds) => {
+        laundryRepository.update(id, date, time, day, note, clothIds);
+        get().fetchData();
+    },
+
     markReturned: (id) => {
         laundryRepository.markReturned(id);
+        get().fetchData();
+    },
+
+    deleteLaundry: (id) => {
+        laundryRepository.delete(id);
         get().fetchData();
     },
 

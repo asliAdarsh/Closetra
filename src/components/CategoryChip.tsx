@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../theme/ThemeContext';
 import { borderRadius, spacing } from '../theme/spacing';
 import { typography } from '../theme/typography';
@@ -7,10 +8,11 @@ import { typography } from '../theme/typography';
 interface CategoryChipProps {
     label: string;
     isSelected?: boolean;
+    icon?: string;
     onPress: () => void;
 }
 
-export const CategoryChip: React.FC<CategoryChipProps> = ({ label, isSelected, onPress }) => {
+export const CategoryChip: React.FC<CategoryChipProps> = ({ label, isSelected, icon, onPress }) => {
     const { colors } = useTheme();
 
     return (
@@ -25,6 +27,14 @@ export const CategoryChip: React.FC<CategoryChipProps> = ({ label, isSelected, o
             onPress={onPress}
             activeOpacity={0.7}
         >
+            {icon && (
+                <Ionicons
+                    name={icon as any}
+                    size={16}
+                    color={isSelected ? colors.background : colors.textSecondary}
+                    style={{ marginRight: 6 }}
+                />
+            )}
             <Text style={[
                 styles.label,
                 { color: isSelected ? colors.background : colors.text }
@@ -37,6 +47,8 @@ export const CategoryChip: React.FC<CategoryChipProps> = ({ label, isSelected, o
 
 const styles = StyleSheet.create({
     chip: {
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingHorizontal: spacing.m,
         paddingVertical: spacing.s,
         borderRadius: borderRadius.round,

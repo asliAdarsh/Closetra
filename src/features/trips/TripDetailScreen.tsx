@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, Switch, LayoutAnimation } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useTripsStore } from './store/tripsStore';
 import { useClothesStore } from '../clothes/store/clothesStore';
 import { useTheme } from '../../theme/ThemeContext';
@@ -12,10 +13,10 @@ import { ClothCard } from '../../components/ClothCard';
 
 export default function TripDetailScreen({ route }: any) {
     const { colors } = useTheme();
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const id = route.params?.id;
 
-    const { history, togglePacked, toggleCollected, getTripItems, deleteTrip } = useTripsStore();
+    const { history, togglePacked, collectAll, uncollectAll, getTripItems, deleteTrip } = useTripsStore();
     const { clothes } = useClothesStore();
 
     const trip = history.find(t => t.id === id);
@@ -36,8 +37,10 @@ export default function TripDetailScreen({ route }: any) {
 
     const packedCount = items.filter(i => i.isPacked).length;
     const progress = items.length === 0 ? 0 : (packedCount / items.length) * 100;
+    const allPacked = items.length > 0 && items.every(i => i.isPacked);
 
     const handleDelete = () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         Alert.alert("Delete Trip", "Are you sure you want to delete this trip?", [
             { text: "Cancel", style: "cancel" },
             {
@@ -49,16 +52,36 @@ export default function TripDetailScreen({ route }: any) {
         ]);
     };
 
+    const handleCollectionToggle = (val: boolean) => {
+        if (val) {
+            collectAll(trip.id);
+        } else {
+            uncollectAll(trip.id);
+        }
+    };
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <Ionicons name="arrow-back" size={28} color={colors.text} onPress={() => navigation.goBack()} />
                 <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{trip.name}</Text>
-                <Ionicons name="trash-outline" size={24} color={colors.error} onPress={handleDelete} />
+                <View style={styles.headerRight}>
+                    <Ionicons
+                        name="create-outline"
+                        size={24}
+                        color={colors.primary}
+                        onPress={() => navigation.navigate('EditTrip', { id: trip.id })}
+                        style={{ marginRight: spacing.m }}
+                    />
+                    <Ionicons name="trash-outline" size={24} color={colors.error} onPress={handleDelete} />
+                </View>
             </View>
 
             <View style={styles.infoBox}>
                 <Text style={[styles.locText, { color: colors.textSecondary }]}>{trip.location} • {trip.date}</Text>
+                {!!trip.notes && (
+                    <Text style={[styles.notesText, { color: colors.textSecondary }]}>{trip.notes}</Text>
+                )}
 
                 <View style={styles.progressContainer}>
                     <Text style={[styles.progressText, { color: colors.text }]}>Packed: {packedCount} / {items.length}</Text>
@@ -68,15 +91,10 @@ export default function TripDetailScreen({ route }: any) {
                 </View>
 
                 <View style={[styles.collectionToggle, { borderTopColor: colors.border }]}>
-                    <Text style={[styles.progressText, { color: colors.text }]}>Mark items as collected?</Text>
+                    <Text style={[styles.progressText, { color: colors.text }]}>Pack all items</Text>
                     <Switch
-                        value={items.every(i => i.isCollected)}
-                        onValueChange={(val) => {
-                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                            items.forEach(item => {
-                                toggleCollected(item.tripItemId, val)
-                            })
-                        }}
+                        value={allPacked}
+                        onValueChange={handleCollectionToggle}
                         trackColor={{ false: colors.border, true: colors.primary }}
                     />
                 </View>
@@ -92,7 +110,6 @@ export default function TripDetailScreen({ route }: any) {
                     <TouchableOpacity
                         style={[styles.cardWrapper, item.isPacked && { opacity: 0.6 }]}
                         onPress={() => {
-                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                             togglePacked(item.tripItemId, !item.isPacked);
                         }}
                         activeOpacity={0.8}
@@ -100,7 +117,6 @@ export default function TripDetailScreen({ route }: any) {
                         <ClothCard
                             cloth={item}
                             onPress={() => {
-                                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                                 togglePacked(item.tripItemId, !item.isPacked);
                             }}
                             onToggleFavorite={() => { }}
@@ -127,10 +143,15 @@ const styles = StyleSheet.create({
         padding: spacing.l,
         borderBottomWidth: 1,
     },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     title: { ...typography.h3, flex: 1, textAlign: 'center', paddingHorizontal: spacing.s },
     infoBox: { padding: spacing.l, alignItems: 'center' },
-    locText: { ...typography.body, marginBottom: spacing.m },
-    progressContainer: { width: '100%', alignItems: 'center' },
+    locText: { ...typography.body, marginBottom: spacing.s },
+    notesText: { ...typography.caption, marginBottom: spacing.m, textAlign: 'center', fontStyle: 'italic' },
+    progressContainer: { width: '100%', alignItems: 'center', marginTop: spacing.s },
     progressText: { ...typography.body, fontWeight: 'bold', marginBottom: spacing.s },
     progressBarBg: { width: '100%', height: 8, borderRadius: 4, overflow: 'hidden' },
     progressBarFill: { height: '100%' },

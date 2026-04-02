@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import TripsScreen from '../features/trips/TripsScreen';
 import AddTripScreen from '../features/trips/AddTripScreen';
 import TripDetailScreen from '../features/trips/TripDetailScreen';
+import EditTripScreen from '../features/trips/EditTripScreen';
 
 const Stack = createStackNavigator();
 
@@ -12,6 +13,7 @@ export default function TripsNavigator() {
             <Stack.Screen name="TripsList" component={TripsScreen} />
             <Stack.Screen name="AddTrip" component={AddTripScreen} />
             <Stack.Screen name="TripDetail" component={TripDetailScreen} />
+            <Stack.Screen name="EditTrip" component={EditTripScreen} />
         </Stack.Navigator>
     );
 }

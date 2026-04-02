@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
@@ -11,21 +11,32 @@ import { spacing, borderRadius } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 import { ClothCard } from '../../components/ClothCard';
 
-export default function AddLaundryScreen() {
+export default function EditLaundryScreen({ route }: any) {
     const { colors } = useTheme();
     const navigation = useNavigation();
-    const { addLaundry, clothesInLaundry } = useLaundryStore();
+    const sessionId = route.params?.id;
+
+    const { history, updateLaundry, clothesInLaundry, getLaundryItems } = useLaundryStore();
     const { clothes } = useClothesStore();
 
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [note, setNote] = useState('');
+    const session = history.find(s => s.id === sessionId);
+    const existingItems = useMemo(() => getLaundryItems(sessionId), [sessionId, getLaundryItems]);
+
+    const [date, setDate] = useState(session?.date || new Date().toISOString().split('T')[0]);
+    const [note, setNote] = useState(session?.note || '');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedClothIds, setSelectedClothIds] = useState<string[]>([]);
+    const [selectedClothIds, setSelectedClothIds] = useState<string[]>(
+        existingItems.map(i => i.clothId)
+    );
     const [showPicker, setShowPicker] = useState(false);
 
     const availableClothes = useMemo(() => {
+        const existingIds = existingItems.map(i => i.clothId);
         return clothes.filter(c => {
-            if (clothesInLaundry.includes(c.id)) return false;
+            // Include clothes already in this session, exclude clothes in other sessions
+            if (clothesInLaundry.includes(c.id) && !existingIds.includes(c.id)) {
+                return false;
+            }
             if (searchQuery) {
                 const query = searchQuery.toLowerCase();
                 if (!c.name.toLowerCase().includes(query) &&
@@ -37,7 +48,7 @@ export default function AddLaundryScreen() {
             }
             return true;
         });
-    }, [clothes, clothesInLaundry, searchQuery]);
+    }, [clothes, clothesInLaundry, existingItems, searchQuery]);
 
     const toggleSelection = (id: string) => {
         setSelectedClothIds(prev =>
@@ -47,21 +58,23 @@ export default function AddLaundryScreen() {
 
     const handleSave = () => {
         if (selectedClothIds.length === 0) {
-            alert("Please select at least one cloth.");
+            Alert.alert("No Items", "Please select at least one cloth.");
             return;
         }
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        const time = session?.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const day = session?.day || new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-        addLaundry(date, time, day, note, selectedClothIds);
+        updateLaundry(sessionId, date, time, day, note, selectedClothIds);
         navigation.goBack();
     };
+
+    if (!session) return null;
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <Ionicons name="close" size={28} color={colors.text} onPress={() => navigation.goBack()} />
-                <Text style={[styles.title, { color: colors.text }]}>Add to Laundry</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Edit Laundry</Text>
                 <TouchableOpacity onPress={handleSave}>
                     <Text style={[styles.saveBtn, { color: colors.primary }]}>Save</Text>
                 </TouchableOpacity>

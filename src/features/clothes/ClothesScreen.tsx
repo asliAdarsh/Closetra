@@ -23,7 +23,7 @@ type ClothesStackParamList = {
 type NavigationProp = StackNavigationProp<ClothesStackParamList, 'ClothesList'>;
 
 export default function ClothesScreen() {
-    const { colors } = useTheme();
+    const { colors, gridColumns } = useTheme();
     const navigation = useNavigation<NavigationProp>();
 
     const {
@@ -102,11 +102,12 @@ export default function ClothesScreen() {
             </View>
 
             <FlatList
+                key={`grid-${gridColumns}`}
                 data={filteredClothes}
                 keyExtractor={item => item.id}
-                numColumns={2}
+                numColumns={gridColumns}
                 contentContainerStyle={styles.grid}
-                columnWrapperStyle={styles.row}
+                columnWrapperStyle={gridColumns > 1 ? styles.row : undefined}
                 ListEmptyComponent={
                     <EmptyState
                         iconName="shirt-outline"
@@ -115,7 +116,7 @@ export default function ClothesScreen() {
                     />
                 }
                 renderItem={({ item }) => (
-                    <View style={styles.cardWrapper}>
+                    <View style={gridColumns > 1 ? { flex: 1, maxWidth: `${100 / gridColumns}%` } : { marginBottom: spacing.m }}>
                         <ClothCard
                             cloth={item}
                             onPress={() => navigation.navigate('EditCloth', { id: item.id })}
@@ -178,6 +179,7 @@ const styles = StyleSheet.create({
     },
     row: {
         gap: spacing.m,
+        marginBottom: spacing.m,
     },
     cardWrapper: {
         flex: 1,

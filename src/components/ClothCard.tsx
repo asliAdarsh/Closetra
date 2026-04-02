@@ -81,11 +81,16 @@ export const ClothCard: React.FC<ClothCardProps> = ({
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: borderRadius.m,
+        borderRadius: borderRadius.xl,
         borderWidth: 1,
         overflow: 'hidden',
         marginBottom: spacing.m,
         flex: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
     },
     image: {
         width: '100%',

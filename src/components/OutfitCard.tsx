@@ -76,12 +76,17 @@ export const OutfitCard: React.FC<Props> = ({ outfit, items, onPress, onToggleFa
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: borderRadius.l,
+        borderRadius: borderRadius.xl,
         borderWidth: 1,
         overflow: 'hidden',
         position: 'relative',
         height: 200,
         justifyContent: 'space-between',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
     },
     gridContainer: {
         flex: 1,

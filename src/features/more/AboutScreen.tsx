@@ -22,7 +22,7 @@ export default function AboutScreen() {
             <View style={styles.content}>
                 <Ionicons name="shirt-outline" size={80} color={colors.primary} style={{ marginBottom: spacing.m }} />
                 <Text style={[styles.appName, { color: colors.text }]}>Closetra</Text>
-                <Text style={[styles.version, { color: colors.textSecondary }]}>Version 1.0.0</Text>
+                <Text style={[styles.version, { color: colors.textSecondary }]}>Version 2.0.0</Text>
 
                 <Text style={[styles.desc, { color: colors.text }]}>
                     Your offline, privacy-first wardrobe manager.

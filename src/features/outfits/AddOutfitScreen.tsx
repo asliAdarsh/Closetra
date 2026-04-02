@@ -1,19 +1,21 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useOutfitsStore } from './store/outfitsStore';
 import { useClothesStore } from '../clothes/store/clothesStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 import { ClothCard } from '../../components/ClothCard';
+import { CategoryChip } from '../../components/CategoryChip';
 
 export default function AddOutfitScreen({ route }: any) {
     const { colors } = useTheme();
     const navigation = useNavigation<any>();
-    const { outfits, addOutfit, updateOutfit, deleteOutfit, getOutfitItems } = useOutfitsStore();
+    const { outfits, addOutfit, updateOutfit, deleteOutfit, getOutfitItems, outfitCategories } = useOutfitsStore();
     const { clothes } = useClothesStore();
 
     const editId = route.params?.id;
@@ -21,6 +23,7 @@ export default function AddOutfitScreen({ route }: any) {
 
     const [name, setName] = useState(existingOutfit?.name || '');
     const [notes, setNotes] = useState(existingOutfit?.notes || '');
+    const [categoryId, setCategoryId] = useState(existingOutfit?.categoryId || '');
     const [selectedClothIds, setSelectedClothIds] = useState<Set<string>>(new Set());
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -45,7 +48,7 @@ export default function AddOutfitScreen({ route }: any) {
 
     const handleSave = () => {
         if (selectedClothIds.size === 0) {
-            alert("Please select at least one item of clothing.");
+            Alert.alert('No Items', 'Please select at least one item of clothing.');
             return;
         }
 
@@ -53,20 +56,32 @@ export default function AddOutfitScreen({ route }: any) {
         const finalNotes = notes.trim();
 
         if (existingOutfit) {
-            updateOutfit(existingOutfit.id, finalName, finalNotes, Array.from(selectedClothIds));
-            // Navigate back to OutfitDetail if it was open, or just go back
+            updateOutfit(existingOutfit.id, finalName, finalNotes, Array.from(selectedClothIds), categoryId);
             navigation.goBack();
         } else {
-            addOutfit(finalName, finalNotes, Array.from(selectedClothIds));
+            addOutfit(finalName, finalNotes, Array.from(selectedClothIds), categoryId);
             navigation.goBack();
         }
     };
 
     const handleDelete = () => {
         if (existingOutfit) {
-            deleteOutfit(existingOutfit.id);
-            // We need to pop to top of stack since the Detail screen is also in the stack
-            navigation.popToTop();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            Alert.alert(
+                'Delete Outfit',
+                'Are you sure you want to permanently delete this outfit?',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: () => {
+                            deleteOutfit(existingOutfit.id);
+                            navigation.popToTop();
+                        },
+                    },
+                ]
+            );
         }
     };
 
@@ -114,6 +129,29 @@ export default function AddOutfitScreen({ route }: any) {
                         multiline
                     />
                 </View>
+
+                {/* Category Selector */}
+                {outfitCategories.length > 0 && (
+                    <>
+                        <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: spacing.s }]}>Category</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.l }}>
+                            <CategoryChip
+                                label="None"
+                                isSelected={!categoryId}
+                                onPress={() => setCategoryId('')}
+                            />
+                            {outfitCategories.map(cat => (
+                                <CategoryChip
+                                    key={cat.id}
+                                    label={cat.name}
+                                    icon={cat.icon}
+                                    isSelected={categoryId === cat.id}
+                                    onPress={() => setCategoryId(cat.id)}
+                                />
+                            ))}
+                        </ScrollView>
+                    </>
+                )}
 
                 <View style={styles.sectionHeader}>
                     <Text style={[styles.sectionTitle, { color: colors.text }]}>Select Clothes</Text>

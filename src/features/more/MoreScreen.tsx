@@ -1,17 +1,20 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 import { exportData, importData } from '../../utils/backupRestore';
 import { getDb } from '../../database/db';
+import { useUpdateChecker } from '../../hooks/useUpdateChecker';
 
 export default function MoreScreen() {
     const { colors } = useTheme();
     const navigation = useNavigation<any>();
+    const { checkForUpdates, isChecking } = useUpdateChecker();
 
     const handleBackup = async () => {
         try {
@@ -46,6 +49,7 @@ export default function MoreScreen() {
     };
 
     const handleClearData = () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
         Alert.alert(
             "Clear All Data",
             "This cannot be undone. All your clothes, trips, and settings will be permanently deleted.",
@@ -71,16 +75,17 @@ export default function MoreScreen() {
         );
     };
 
-    const renderItem = (icon: any, title: string, onPress: () => void, colorOverride?: string) => (
+    const renderItem = (icon: any, title: string, onPress: () => void, colorOverride?: string, customRight?: React.ReactNode) => (
         <TouchableOpacity
             style={[styles.item, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}
             onPress={onPress}
+            disabled={!!customRight && isChecking} // disable if loading visually replaces arrow
         >
             <View style={styles.itemLeft}>
                 <Ionicons name={icon} size={24} color={colorOverride || colors.primary} style={styles.icon} />
                 <Text style={[styles.itemText, { color: colorOverride || colors.text }]}>{title}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+            {customRight ? customRight : <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />}
         </TouchableOpacity>
     );
 
@@ -103,6 +108,13 @@ export default function MoreScreen() {
 
                 <View style={styles.section}>
                     {renderItem("information-circle", "About", () => navigation.navigate('About'))}
+                    {renderItem(
+                        "refresh",
+                        "Check for Updates",
+                        () => checkForUpdates(),
+                        undefined,
+                        isChecking ? <ActivityIndicator size="small" color={colors.primary} /> : undefined
+                    )}
                 </View>
 
                 <View style={styles.section}>

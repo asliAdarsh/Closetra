@@ -13,26 +13,26 @@ export const outfitRepository = {
         return db.getAllSync<OutfitItem>('SELECT * FROM OutfitItems WHERE outfitId = ?', [outfitId]);
     },
 
-    add: (name: string, notes: string, clothIds: string[]): Outfit => {
+    add: (name: string, notes: string, clothIds: string[], categoryId?: string): Outfit => {
         const id = Crypto.randomUUID();
         db.runSync(
-            'INSERT INTO Outfits (id, name, notes, isFavorite) VALUES (?, ?, ?, ?)',
-            [id, name, notes, 0]
+            'INSERT INTO Outfits (id, name, notes, isFavorite, categoryId) VALUES (?, ?, ?, ?, ?)',
+            [id, name, notes, 0, categoryId || '']
         );
         for (const clothId of clothIds) {
             db.runSync('INSERT INTO OutfitItems (id, outfitId, clothId) VALUES (?, ?, ?)', [Crypto.randomUUID(), id, clothId]);
         }
-        return { id, name, notes, isFavorite: 0 };
+        return { id, name, notes, isFavorite: 0, categoryId: categoryId || '' };
     },
 
     toggleFavorite: (id: string, isFavorite: number): void => {
         db.runSync('UPDATE Outfits SET isFavorite = ? WHERE id = ?', [isFavorite, id]);
     },
 
-    update: (id: string, name: string, notes: string, clothIds: string[]): void => {
+    update: (id: string, name: string, notes: string, clothIds: string[], categoryId?: string): void => {
         db.runSync(
-            'UPDATE Outfits SET name = ?, notes = ? WHERE id = ?',
-            [name, notes, id]
+            'UPDATE Outfits SET name = ?, notes = ?, categoryId = ? WHERE id = ?',
+            [name, notes, categoryId || '', id]
         );
         db.runSync('DELETE FROM OutfitItems WHERE outfitId = ?', [id]);
         for (const clothId of clothIds) {

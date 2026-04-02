@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
@@ -22,6 +22,7 @@ export default function AddTripScreen() {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [name, setName] = useState('');
     const [location, setLocation] = useState('');
+    const [notes, setNotes] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedClothIds, setSelectedClothIds] = useState<string[]>([]);
     const [showPicker, setShowPicker] = useState(false);
@@ -50,17 +51,17 @@ export default function AddTripScreen() {
 
     const handleSave = () => {
         if (!name.trim() || !location.trim()) {
-            alert("Please provide a name and location.");
+            Alert.alert("Missing Info", "Please provide a name and location.");
             return;
         }
         if (selectedClothIds.length === 0) {
-            alert("Please pack at least one cloth.");
+            Alert.alert("No Items", "Please pack at least one cloth.");
             return;
         }
         const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-        addTrip(name, location, date, time, day, selectedClothIds);
+        addTrip(name, location, date, time, day, notes, selectedClothIds);
         navigation.goBack();
     };
 
@@ -74,34 +75,37 @@ export default function AddTripScreen() {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.form}>
-                <Text style={[styles.label, { color: colors.text }]}>Trip Name</Text>
-                <TextInput
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    value={name}
-                    onChangeText={setName}
-                    placeholder="e.g. Summer Vacation"
-                    placeholderTextColor={colors.textSecondary}
-                />
+            <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+                <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Trip Name</Text>
+                    <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={name}
+                        onChangeText={setName}
+                        placeholder="e.g. Summer Vacation"
+                        placeholderTextColor={colors.textSecondary}
+                    />
+                </View>
 
-                <Text style={[styles.label, { color: colors.text }]}>Location</Text>
-                <TextInput
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    value={location}
-                    onChangeText={setLocation}
-                    placeholder="e.g. Hawaii"
-                    placeholderTextColor={colors.textSecondary}
-                />
+                <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Location</Text>
+                    <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={location}
+                        onChangeText={setLocation}
+                        placeholder="e.g. Hawaii"
+                        placeholderTextColor={colors.textSecondary}
+                    />
+                </View>
 
-                <Text style={[styles.label, { color: colors.text }]}>Date</Text>
-                <TouchableOpacity
-                    style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border }]}
-                    onPress={() => setShowPicker(true)}
-                >
-                    <Text style={{ color: date ? colors.text : colors.textSecondary }}>
-                        {date || "YYYY-MM-DD"}
-                    </Text>
-                </TouchableOpacity>
+                <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Date</Text>
+                    <TouchableOpacity onPress={() => setShowPicker(true)}>
+                        <Text style={[styles.input, { color: date ? colors.text : colors.textSecondary }]}>
+                            {date || "YYYY-MM-DD"}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
                 {showPicker && (
                     <DateTimePicker
@@ -117,44 +121,63 @@ export default function AddTripScreen() {
                     />
                 )}
 
-                <Text style={[styles.label, { color: colors.text, marginTop: spacing.l }]}>Select Clothes to Pack</Text>
-                <TextInput
-                    style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
-                    placeholder="Search by name, color, brand..."
-                    placeholderTextColor={colors.textSecondary}
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                />
-            </View>
+                <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Notes (Optional)</Text>
+                    <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={notes}
+                        onChangeText={setNotes}
+                        placeholder="e.g. Don't forget chargers"
+                        placeholderTextColor={colors.textSecondary}
+                        multiline
+                    />
+                </View>
 
-            <FlatList
-                data={availableClothes}
-                keyExtractor={item => item.id}
-                numColumns={2}
-                contentContainerStyle={styles.grid}
-                columnWrapperStyle={styles.row}
-                renderItem={({ item }) => {
-                    const isSelected = selectedClothIds.includes(item.id);
-                    return (
-                        <TouchableOpacity
-                            style={[styles.cardWrapper, isSelected && { opacity: 0.5 }]}
-                            onPress={() => toggleSelection(item.id)}
-                            activeOpacity={0.8}
-                        >
-                            <ClothCard
-                                cloth={item}
+                <View style={styles.sectionHeader}>
+                    <Text style={[styles.sectionTitle, { color: colors.text }]}>Select Clothes</Text>
+                    <Text style={[styles.countText, { color: colors.primary }]}>{selectedClothIds.length} selected</Text>
+                </View>
+
+                <View style={styles.searchContainer}>
+                    <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+                    <TextInput
+                        style={[styles.searchInput, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}
+                        placeholder="Search color, brand, notes..."
+                        placeholderTextColor={colors.textSecondary}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                    />
+                </View>
+
+                <View style={styles.grid}>
+                    {availableClothes.map((item) => {
+                        const isSelected = selectedClothIds.includes(item.id);
+                        return (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={[
+                                    styles.gridItem,
+                                    isSelected && { borderColor: colors.primary, borderWidth: 3 }
+                                ]}
                                 onPress={() => toggleSelection(item.id)}
-                                onToggleFavorite={() => { }}
-                            />
-                            {isSelected && (
-                                <View style={styles.checkOverlay}>
-                                    <Ionicons name="checkmark-circle" size={40} color={colors.primary} />
-                                </View>
-                            )}
-                        </TouchableOpacity>
-                    );
-                }}
-            />
+                                activeOpacity={0.8}
+                            >
+                                <ClothCard
+                                    cloth={item}
+                                    onPress={() => toggleSelection(item.id)}
+                                    onToggleFavorite={() => { }}
+                                    hideFavorite={true}
+                                />
+                                {isSelected && (
+                                    <View style={[styles.checkBadge, { backgroundColor: colors.primary }]}>
+                                        <Ionicons name="checkmark" size={16} color={colors.background} />
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
@@ -170,30 +193,75 @@ const styles = StyleSheet.create({
     },
     title: { ...typography.h3 },
     saveBtn: { ...typography.h3, fontWeight: 'bold' },
-    form: { paddingHorizontal: spacing.l, paddingTop: spacing.l },
-    label: { ...typography.body, fontWeight: 'bold', marginBottom: spacing.s, marginTop: spacing.m },
-    input: {
-        borderWidth: 1,
-        borderRadius: borderRadius.m,
-        padding: spacing.m,
-        ...typography.body,
+    contentContainer: {
+        padding: spacing.l,
+        paddingBottom: 100,
     },
-    grid: { paddingHorizontal: spacing.l, paddingBottom: 100, paddingTop: spacing.m },
-    row: { gap: spacing.m },
-    cardWrapper: { flex: 1, maxWidth: '50%' },
-    checkOverlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(255,255,255,0.4)',
+    inputContainer: {
+        padding: spacing.m,
+        borderRadius: borderRadius.m,
+        borderWidth: 1,
+        marginBottom: spacing.l,
+    },
+    label: {
+        ...typography.caption,
+        marginBottom: spacing.xs,
+    },
+    input: {
+        ...typography.body,
+        padding: 0,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        marginBottom: spacing.m,
+        marginTop: spacing.s,
+    },
+    sectionTitle: { ...typography.h3 },
+    countText: { ...typography.body, fontWeight: 'bold' },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: spacing.l,
+    },
+    searchIcon: {
+        position: 'absolute',
+        left: 12,
+        zIndex: 1,
+    },
+    searchInput: {
+        flex: 1,
+        height: 48,
+        borderWidth: 1,
+        borderRadius: 24,
+        paddingLeft: 40,
+        paddingRight: spacing.m,
+    },
+    grid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: spacing.m,
+    },
+    gridItem: {
+        width: '47%',
+        marginBottom: spacing.m,
+        borderRadius: borderRadius.m,
+        overflow: 'hidden',
+    },
+    checkBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        width: 28,
+        height: 28,
+        borderRadius: 14,
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: borderRadius.m,
-    },
-    searchBar: {
-        borderWidth: 1,
-        borderRadius: borderRadius.round,
-        paddingHorizontal: spacing.l,
-        paddingVertical: spacing.m,
-        ...typography.body,
-        marginTop: spacing.s,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     }
 });
