@@ -13,18 +13,41 @@ export const tripRepository = {
         return db.getAllSync<TripItem>('SELECT * FROM TripItems WHERE tripId = ?', [tripId]);
     },
 
-    add: (name: string, location: string, date: string, time: string, day: string, clothIds: string[]): Trip => {
+    add: (name: string, location: string, date: string, time: string, day: string, notes: string, clothIds: string[]): Trip => {
         const id = Crypto.randomUUID();
         db.runSync(
-            'INSERT INTO Trips (id, name, location, date, time, day) VALUES (?, ?, ?, ?, ?, ?)',
-            [id, name, location, date, time, day]
+            'INSERT INTO Trips (id, name, location, date, time, day, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [id, name, location, date, time, day, notes || '']
         );
 
         for (const clothId of clothIds) {
             db.runSync('INSERT INTO TripItems (id, tripId, clothId, isPacked, isCollected) VALUES (?, ?, ?, 0, 0)', [Crypto.randomUUID(), id, clothId]);
         }
 
-        return { id, name, location, date, time, day };
+        return { id, name, location, date, time, day, notes: notes || '' };
+    },
+
+    update: (id: string, name: string, location: string, date: string, time: string, day: string, notes: string, clothIds: string[]): void => {
+        try {
+            // Update trip metadata
+            db.runSync(
+                'UPDATE Trips SET name = ?, location = ?, date = ?, time = ?, day = ?, notes = ? WHERE id = ?',
+                [name, location, date, time, day, notes || '', id]
+            );
+
+            // Replace trip items: delete old, insert new
+            db.runSync('DELETE FROM TripItems WHERE tripId = ?', [id]);
+
+            for (const clothId of clothIds) {
+                db.runSync(
+                    'INSERT INTO TripItems (id, tripId, clothId, isPacked, isCollected) VALUES (?, ?, ?, 0, 0)',
+                    [Crypto.randomUUID(), id, clothId]
+                );
+            }
+        } catch (error) {
+            console.error('Failed to update trip:', error);
+            throw error;
+        }
     },
 
     togglePacked: (tripItemId: string, isPacked: number): void => {
@@ -33,6 +56,24 @@ export const tripRepository = {
 
     toggleCollected: (tripItemId: string, isCollected: number): void => {
         db.runSync("UPDATE TripItems SET isCollected = ? WHERE id = ?", [isCollected, tripItemId]);
+    },
+
+    collectAll: (tripId: string): void => {
+        try {
+            db.runSync("UPDATE TripItems SET isPacked = 1 WHERE tripId = ?", [tripId]);
+        } catch (error) {
+            console.error('Failed to pack all items:', error);
+            throw error;
+        }
+    },
+
+    uncollectAll: (tripId: string): void => {
+        try {
+            db.runSync("UPDATE TripItems SET isPacked = 0 WHERE tripId = ?", [tripId]);
+        } catch (error) {
+            console.error('Failed to unpack all items:', error);
+            throw error;
+        }
     },
 
     delete: (id: string): void => {

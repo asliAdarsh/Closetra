@@ -40,9 +40,9 @@ export default function LaundryScreen() {
                         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
                         onPress={() => navigation.navigate('LaundryDetail', { id: item.id })}
                     >
-                        <View>
+                        <View style={styles.cardTextContainer}>
                             <Text style={[styles.dateText, { color: colors.text }]}>{item.date} • {item.day}</Text>
-                            {!!item.note && <Text style={[styles.noteText, { color: colors.textSecondary }]}>{item.note}</Text>}
+                            {!!item.note && <Text style={[styles.noteText, { color: colors.textSecondary }]} numberOfLines={1}>{item.note}</Text>}
                         </View>
                         <View style={[
                             styles.statusBadge,
@@ -77,8 +77,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: spacing.m,
         borderWidth: 1,
-        borderRadius: borderRadius.m,
+        borderRadius: borderRadius.xl,
         marginBottom: spacing.m,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    cardTextContainer: {
+        flex: 1,
+        flexShrink: 1,
+        marginRight: spacing.m,
     },
     dateText: { ...typography.body, fontWeight: 'bold', marginBottom: 4 },
     noteText: { ...typography.small },

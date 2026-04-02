@@ -1,76 +1,112 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, LayoutAnimation, TouchableOpacity } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { View, Text, FlatList, TextInput, StyleSheet, LayoutAnimation } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useOutfitsStore } from './store/outfitsStore';
 import { useClothesStore } from '../clothes/store/clothesStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { FloatingActionButton } from '../../components/FloatingActionButton';
 import { EmptyState } from '../../components/EmptyState';
 import { OutfitCard } from '../../components/OutfitCard';
+import { CategoryChip } from '../../components/CategoryChip';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 import { useNavigation } from '@react-navigation/native';
 
 export default function OutfitsScreen() {
-    const { colors } = useTheme();
+    const { colors, gridColumns } = useTheme();
     const navigation = useNavigation<any>();
-    const { outfits, fetchData, toggleFavorite, getOutfitItems } = useOutfitsStore();
+    const {
+        outfits, outfitCategories, selectedOutfitCategoryId, searchQuery, showFavoritesOnly,
+        fetchData, toggleFavorite, getOutfitItems, setSelectedOutfitCategory, setSearchQuery, setShowFavoritesOnly
+    } = useOutfitsStore();
     const { clothes } = useClothesStore();
-    const [filter, setFilter] = useState<'All' | 'Favorites'>('All');
 
     useEffect(() => {
         fetchData();
     }, [fetchData]);
 
-    const filteredOutfits = filter === 'Favorites' ? outfits.filter(o => o.isFavorite) : outfits;
+    const filteredOutfits = useMemo(() => {
+        return outfits.filter(o => {
+            if (selectedOutfitCategoryId && o.categoryId !== selectedOutfitCategoryId) {
+                return false;
+            }
+            if (showFavoritesOnly && !o.isFavorite) {
+                return false;
+            }
+            if (searchQuery) {
+                const query = searchQuery.toLowerCase();
+                if (!o.name.toLowerCase().includes(query) &&
+                    !(o.notes || '').toLowerCase().includes(query)) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }, [outfits, selectedOutfitCategoryId, showFavoritesOnly, searchQuery]);
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
                 <Text style={[styles.title, { color: colors.text }]}>Outfits</Text>
+                <Ionicons
+                    name="settings-outline"
+                    size={24}
+                    color={colors.text}
+                    onPress={() => navigation.navigate('OutfitCategoryManager')}
+                />
             </View>
 
-            <View style={styles.filterRow}>
-                <TouchableOpacity
-                    style={[
-                        styles.filterChip,
-                        { borderColor: colors.border },
-                        filter === 'All' && { backgroundColor: colors.text, borderColor: colors.text }
-                    ]}
-                    onPress={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                        setFilter('All');
-                    }}
-                >
-                    <Text style={[styles.filterText, { color: filter === 'All' ? colors.background : colors.text }]}>All</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[
-                        styles.filterChip,
-                        { borderColor: colors.border },
-                        filter === 'Favorites' && { backgroundColor: colors.text, borderColor: colors.text }
-                    ]}
-                    onPress={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                        setFilter('Favorites');
-                    }}
-                >
-                    <Text style={[styles.filterText, { color: filter === 'Favorites' ? colors.background : colors.text }]}>Favorites</Text>
-                </TouchableOpacity>
+            <View style={styles.searchContainer}>
+                <Ionicons name="search" size={20} color={colors.textSecondary} style={styles.searchIcon} />
+                <TextInput
+                    style={[styles.searchInput, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}
+                    placeholder="Search name, notes..."
+                    placeholderTextColor={colors.textSecondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                />
+                <Ionicons
+                    name={showFavoritesOnly ? "heart" : "heart-outline"}
+                    size={28}
+                    color={showFavoritesOnly ? colors.error : colors.textSecondary}
+                    onPress={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                />
             </View>
+
+            {/* Category Filter */}
+            {outfitCategories.length > 0 && (
+                <View>
+                    <FlatList
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.categoryList}
+                        data={[{ id: null, name: 'All' }, ...outfitCategories]}
+                        keyExtractor={item => item.id || 'all'}
+                        renderItem={({ item }) => (
+                            <CategoryChip
+                                label={item.name}
+                                icon={(item as any).icon}
+                                isSelected={selectedOutfitCategoryId === item.id}
+                                onPress={() => setSelectedOutfitCategory(item.id)}
+                            />
+                        )}
+                    />
+                </View>
+            )}
 
             <FlatList
                 data={filteredOutfits}
+                key={`grid-${gridColumns}`}
                 keyExtractor={item => item.id}
-                numColumns={2}
+                numColumns={gridColumns}
                 contentContainerStyle={styles.grid}
-                columnWrapperStyle={styles.row}
+                columnWrapperStyle={gridColumns > 1 ? styles.row : undefined}
                 ListEmptyComponent={
                     <EmptyState
                         iconName="body-outline"
-                        message={filter === 'Favorites' ? "No favorite outfits" : "No outfits saved"}
-                        subMessage={filter === 'Favorites' ? "Tap the heart icon to save." : "Tap the + button to create a new outfit combination."}
+                        message="No outfits found"
+                        subMessage="Try adjusting your filters or create a new outfit."
                     />
                 }
                 renderItem={({ item }) => {
@@ -80,7 +116,7 @@ export default function OutfitsScreen() {
                         .filter(Boolean) as any[];
 
                     return (
-                        <View style={styles.cardWrapper}>
+                        <View style={gridColumns > 1 ? { flex: 1, maxWidth: `${100 / gridColumns}%` } : { marginBottom: spacing.m }}>
                             <OutfitCard
                                 outfit={item}
                                 items={outfitClothes}
@@ -103,28 +139,38 @@ export default function OutfitsScreen() {
 const styles = StyleSheet.create({
     container: { flex: 1 },
     header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         paddingHorizontal: spacing.l,
         paddingTop: spacing.xl,
         paddingBottom: spacing.s,
     },
     title: { ...typography.h1 },
-    filterRow: {
+    searchContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
         paddingHorizontal: spacing.l,
-        paddingBottom: spacing.m,
-        gap: spacing.s,
+        marginBottom: spacing.m,
     },
-    filterChip: {
-        paddingHorizontal: spacing.m,
-        paddingVertical: spacing.xs,
-        borderRadius: borderRadius.round,
+    searchIcon: {
+        position: 'absolute',
+        left: spacing.xl + 10,
+        zIndex: 1,
+    },
+    searchInput: {
+        flex: 1,
+        height: 48,
         borderWidth: 1,
+        borderRadius: 24,
+        paddingLeft: 40,
+        paddingRight: spacing.m,
+        marginRight: spacing.m,
     },
-    filterText: {
-        ...typography.body,
-        fontWeight: 'bold',
+    categoryList: {
+        paddingHorizontal: spacing.l,
+        marginBottom: spacing.s,
     },
     grid: { paddingHorizontal: spacing.l, paddingBottom: 100 },
     row: { gap: spacing.m, marginBottom: spacing.m },
-    cardWrapper: { flex: 1, maxWidth: '50%' },
 });

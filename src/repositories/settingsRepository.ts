@@ -10,7 +10,7 @@ export const settingsRepository = {
         return {
             id: 'settings',
             theme: 'System',
-            animationsEnabled: 1,
+            themeName: 'Classic',
             gridColumns: 2,
             defaultSeason: 'All-Season',
             defaultCategoryId: '',

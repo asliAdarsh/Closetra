@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, LayoutAnimation } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useLaundryStore } from './store/laundryStore';
 import { useClothesStore } from '../clothes/store/clothesStore';
 import { useTheme } from '../../theme/ThemeContext';
@@ -12,10 +13,10 @@ import { ClothCard } from '../../components/ClothCard';
 
 export default function LaundryDetailScreen({ route }: any) {
     const { colors } = useTheme();
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const id = route.params?.id;
 
-    const { history, markReturned, getLaundryItems } = useLaundryStore();
+    const { history, markReturned, getLaundryItems, deleteLaundry } = useLaundryStore();
     const { clothes } = useClothesStore();
 
     const laundry = history.find(l => l.id === id);
@@ -31,12 +32,42 @@ export default function LaundryDetailScreen({ route }: any) {
 
     if (!laundry) return null;
 
+    const handleDelete = () => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        Alert.alert(
+            'Delete Session',
+            'Are you sure you want to delete this laundry session? This cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => {
+                        deleteLaundry(laundry.id);
+                        navigation.goBack();
+                    },
+                },
+            ]
+        );
+    };
+
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <Ionicons name="arrow-back" size={28} color={colors.text} onPress={() => navigation.goBack()} />
                 <Text style={[styles.title, { color: colors.text }]}>Laundry Detail</Text>
-                <View style={{ width: 28 }} />
+                <View style={styles.headerRight}>
+                    {laundry.status === 'Given' && (
+                        <Ionicons
+                            name="create-outline"
+                            size={24}
+                            color={colors.primary}
+                            onPress={() => navigation.navigate('EditLaundry', { id: laundry.id })}
+                            style={{ marginRight: spacing.m }}
+                        />
+                    )}
+                    <Ionicons name="trash-outline" size={24} color={colors.error} onPress={handleDelete} />
+                </View>
             </View>
 
             <View style={styles.infoBox}>
@@ -51,11 +82,10 @@ export default function LaundryDetailScreen({ route }: any) {
                     <TouchableOpacity
                         style={[styles.returnBtn, { backgroundColor: colors.primary }]}
                         onPress={() => {
-                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                             markReturned(laundry.id);
                         }}
                     >
-                        <Text style={styles.returnBtnText}>Mark as Returned</Text>
+                        <Text style={[styles.returnBtnText, { color: colors.background }]}>Mark as Returned</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -90,6 +120,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: spacing.l,
         borderBottomWidth: 1,
+    },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     title: { ...typography.h3 },
     infoBox: {

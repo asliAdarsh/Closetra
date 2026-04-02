@@ -27,8 +27,41 @@ export const laundryRepository = {
         return { id, date, time, day, note, status: 'Given' };
     },
 
+    update: (id: string, date: string, time: string, day: string, note: string, clothIds: string[]): void => {
+        try {
+            // Update session metadata
+            db.runSync(
+                'UPDATE Laundry SET date = ?, time = ?, day = ?, note = ? WHERE id = ?',
+                [date, time, day, note, id]
+            );
+
+            // Replace cloth items: delete old, insert new
+            db.runSync('DELETE FROM LaundryItems WHERE laundryId = ?', [id]);
+
+            for (const clothId of clothIds) {
+                db.runSync(
+                    'INSERT INTO LaundryItems (id, laundryId, clothId) VALUES (?, ?, ?)',
+                    [Crypto.randomUUID(), id, clothId]
+                );
+            }
+        } catch (error) {
+            console.error('Failed to update laundry session:', error);
+            throw error;
+        }
+    },
+
     markReturned: (id: string): void => {
         db.runSync("UPDATE Laundry SET status = 'Returned' WHERE id = ?", [id]);
+    },
+
+    delete: (id: string): void => {
+        try {
+            db.runSync('DELETE FROM LaundryItems WHERE laundryId = ?', [id]);
+            db.runSync('DELETE FROM Laundry WHERE id = ?', [id]);
+        } catch (error) {
+            console.error('Failed to delete laundry session:', error);
+            throw error;
+        }
     },
 
     getClothesInLaundry: (): string[] => {

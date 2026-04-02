@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Switch } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Switch, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { useClothesStore } from './store/clothesStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { ImagePickerModal } from '../../components/ImagePickerModal';
@@ -79,8 +80,22 @@ export default function AddClothScreen({ route }: any) {
 
     const handleDelete = () => {
         if (existingCloth) {
-            deleteCloth(existingCloth.id);
-            navigation.goBack();
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            Alert.alert(
+                'Delete Item',
+                'Are you sure you want to permanently delete this item? This cannot be undone.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: () => {
+                            deleteCloth(existingCloth.id);
+                            navigation.goBack();
+                        },
+                    },
+                ]
+            );
         }
     };
 
@@ -88,7 +103,7 @@ export default function AddClothScreen({ route }: any) {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <Ionicons name="close" size={28} color={colors.text} onPress={() => navigation.goBack()} />
-                <Text style={[styles.title, { color: colors.text }]}>{existingCloth ? 'Edit Cloth' : 'Add Cloth'}</Text>
+                <Text style={[styles.title, { color: colors.text }]}>{existingCloth ? 'Edit Item' : 'Add Item'}</Text>
                 <TouchableOpacity onPress={handleSave}>
                     <Text style={[styles.saveBtn, { color: colors.primary }]}>Save</Text>
                 </TouchableOpacity>
@@ -220,7 +235,7 @@ export default function AddClothScreen({ route }: any) {
                         )}
                         <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
                             <Ionicons name="trash-outline" size={20} color={colors.error} />
-                            <Text style={[styles.deleteText, { color: colors.error }]}>Delete Cloth</Text>
+                            <Text style={[styles.deleteText, { color: colors.error }]}>Delete Item</Text>
                         </TouchableOpacity>
                     </>
                 )}

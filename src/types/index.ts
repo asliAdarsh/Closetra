@@ -40,6 +40,7 @@ export interface Trip {
     date: string;
     time: string;
     day: string;
+    notes: string;
 }
 
 export interface TripItem {
@@ -61,12 +62,19 @@ export interface Outfit {
     name: string;
     notes: string;
     isFavorite: number;
+    categoryId: string;
+}
+
+export interface OutfitCategory {
+    id: string;
+    name: string;
+    icon: string;
 }
 
 export interface AppSettings {
     id: string;
     theme: 'Light' | 'Dark' | 'System';
-    animationsEnabled: number;
+    themeName: string;
     gridColumns: number;
     defaultSeason: string;
     defaultCategoryId: string;

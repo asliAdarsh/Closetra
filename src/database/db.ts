@@ -90,49 +90,55 @@ export function initDatabase() {
       defaultCategoryId TEXT,
       autoReturnDays INTEGER
     );
+
+    CREATE TABLE IF NOT EXISTS OutfitCategories (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      icon TEXT
+    );
   `);
 
-  try {
-    db.execSync(`ALTER TABLE Clothes ADD COLUMN name TEXT DEFAULT ''`);
-  } catch (e) {
-    // Column already exists, ignore error
-  }
+  // ─── Column Migrations (safe — errors ignored if column exists) ─────
+  const migrations = [
+    `ALTER TABLE Clothes ADD COLUMN name TEXT DEFAULT ''`,
+    `ALTER TABLE TripItems ADD COLUMN isCollected INTEGER DEFAULT 0`,
+    `ALTER TABLE Outfits ADD COLUMN name TEXT DEFAULT 'My Outfit'`,
+    `ALTER TABLE Outfits ADD COLUMN notes TEXT DEFAULT ''`,
+    `ALTER TABLE Outfits ADD COLUMN categoryId TEXT DEFAULT ''`,
+    `ALTER TABLE Trips ADD COLUMN notes TEXT DEFAULT ''`,
+    `ALTER TABLE AppSettings ADD COLUMN themeName TEXT DEFAULT 'Classic'`,
+  ];
 
-  try {
-    db.execSync(`ALTER TABLE TripItems ADD COLUMN isCollected INTEGER DEFAULT 0`);
-  } catch (e) {
-    // Column already exists, ignore error
-  }
-
-  try {
-    db.execSync(`ALTER TABLE Outfits ADD COLUMN name TEXT DEFAULT 'My Outfit'`);
-    db.execSync(`ALTER TABLE Outfits ADD COLUMN notes TEXT DEFAULT ''`);
-
-    // Migrate existing old data if topId exists (this implies we just added name/notes to an old schema)
+  for (const sql of migrations) {
     try {
-      const legacyOutfits = db.getAllSync<any>('SELECT id, topId, bottomId, footwearId FROM Outfits WHERE topId IS NOT NULL');
-
-      for (const outfit of legacyOutfits) {
-        // Insert each piece into OutfitItems
-        if (outfit.topId) {
-          db.runSync('INSERT INTO OutfitItems (id, outfitId, clothId) VALUES (?, ?, ?)', [Crypto.randomUUID(), outfit.id, outfit.topId]);
-        }
-        if (outfit.bottomId) {
-          db.runSync('INSERT INTO OutfitItems (id, outfitId, clothId) VALUES (?, ?, ?)', [Crypto.randomUUID(), outfit.id, outfit.bottomId]);
-        }
-        if (outfit.footwearId) {
-          db.runSync('INSERT INTO OutfitItems (id, outfitId, clothId) VALUES (?, ?, ?)', [Crypto.randomUUID(), outfit.id, outfit.footwearId]);
-        }
-      }
-    } catch (migrateErr) {
-      console.log("Migration or query failed, likely already migrated", migrateErr);
+      db.execSync(sql);
+    } catch (e) {
+      // Column already exists — safe to ignore
     }
-  } catch (e) {
-    // Columns already exist, this isn't the first run after update
+  }
+
+  // ─── Legacy Outfit Migration (topId → OutfitItems) ─────────────────
+  try {
+    const legacyOutfits = db.getAllSync<any>('SELECT id, topId, bottomId, footwearId FROM Outfits WHERE topId IS NOT NULL');
+
+    for (const outfit of legacyOutfits) {
+      if (outfit.topId) {
+        db.runSync('INSERT INTO OutfitItems (id, outfitId, clothId) VALUES (?, ?, ?)', [Crypto.randomUUID(), outfit.id, outfit.topId]);
+      }
+      if (outfit.bottomId) {
+        db.runSync('INSERT INTO OutfitItems (id, outfitId, clothId) VALUES (?, ?, ?)', [Crypto.randomUUID(), outfit.id, outfit.bottomId]);
+      }
+      if (outfit.footwearId) {
+        db.runSync('INSERT INTO OutfitItems (id, outfitId, clothId) VALUES (?, ?, ?)', [Crypto.randomUUID(), outfit.id, outfit.footwearId]);
+      }
+    }
+  } catch (migrateErr) {
+    // Migration or query failed, likely already migrated
   }
 
   seedDefaultCategories(db);
   seedDefaultSettings(db);
+  seedDefaultOutfitCategories(db);
 }
 
 function seedDefaultCategories(db: SQLite.SQLiteDatabase) {
@@ -152,9 +158,29 @@ function seedDefaultSettings(db: SQLite.SQLiteDatabase) {
   const result = db.getFirstSync<{ count: number }>("SELECT COUNT(*) as count FROM AppSettings");
   if (result && result.count === 0) {
     db.runSync(
-      `INSERT INTO AppSettings (id, theme, animationsEnabled, gridColumns, defaultSeason, defaultCategoryId, autoReturnDays) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      ['settings', 'System', 1, 2, 'All-Season', '', 7]
+      `INSERT INTO AppSettings (id, theme, animationsEnabled, gridColumns, defaultSeason, defaultCategoryId, autoReturnDays, themeName) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      ['settings', 'System', 1, 2, 'All-Season', '', 7, 'Classic']
     );
+  }
+}
+
+function seedDefaultOutfitCategories(db: SQLite.SQLiteDatabase) {
+  const result = db.getFirstSync<{ count: number }>("SELECT COUNT(*) as count FROM OutfitCategories");
+  if (result && result.count === 0) {
+    const defaults: Array<{ name: string; icon: string }> = [
+      { name: 'Casual', icon: 'shirt' },
+      { name: 'Formal', icon: 'briefcase' },
+      { name: 'Sport', icon: 'basketball' },
+      { name: 'Party', icon: 'wine' },
+      { name: 'Work', icon: 'business' },
+    ];
+
+    for (const cat of defaults) {
+      db.runSync(
+        "INSERT INTO OutfitCategories (id, name, icon) VALUES (?, ?, ?)",
+        [Crypto.randomUUID(), cat.name, cat.icon]
+      );
+    }
   }
 }

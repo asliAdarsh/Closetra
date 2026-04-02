@@ -57,7 +57,7 @@ export default function AppNavigator() {
                     headerShown: false,
                 })}
             >
-                <Tab.Screen name="Clothes" component={ClothesNavigator} />
+                <Tab.Screen name="Clothes" component={ClothesNavigator} options={{ tabBarLabel: 'Closet' }} />
                 <Tab.Screen name="Laundry" component={LaundryNavigator} />
                 <Tab.Screen name="Trips" component={TripsNavigator} />
                 <Tab.Screen name="Outfits" component={OutfitsNavigator} />

@@ -1,26 +1,37 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useLaundryStore } from './store/laundryStore';
+import { useTripsStore } from './store/tripsStore';
+import { useLaundryStore } from '../laundry/store/laundryStore';
 import { useClothesStore } from '../clothes/store/clothesStore';
 import { useTheme } from '../../theme/ThemeContext';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { typography } from '../../theme/typography';
 import { ClothCard } from '../../components/ClothCard';
 
-export default function AddLaundryScreen() {
+export default function EditTripScreen({ route }: any) {
     const { colors } = useTheme();
     const navigation = useNavigation();
-    const { addLaundry, clothesInLaundry } = useLaundryStore();
+    const tripId = route.params?.id;
+
+    const { history, updateTrip, getTripItems } = useTripsStore();
+    const { clothesInLaundry } = useLaundryStore();
     const { clothes } = useClothesStore();
 
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [note, setNote] = useState('');
+    const trip = history.find(t => t.id === tripId);
+    const existingItems = useMemo(() => getTripItems(tripId), [tripId]);
+
+    const [name, setName] = useState(trip?.name || '');
+    const [location, setLocation] = useState(trip?.location || '');
+    const [date, setDate] = useState(trip?.date || new Date().toISOString().split('T')[0]);
+    const [notes, setNotes] = useState(trip?.notes || '');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedClothIds, setSelectedClothIds] = useState<string[]>([]);
+    const [selectedClothIds, setSelectedClothIds] = useState<string[]>(
+        existingItems.map(i => i.clothId)
+    );
     const [showPicker, setShowPicker] = useState(false);
 
     const availableClothes = useMemo(() => {
@@ -46,28 +57,56 @@ export default function AddLaundryScreen() {
     };
 
     const handleSave = () => {
-        if (selectedClothIds.length === 0) {
-            alert("Please select at least one cloth.");
+        if (!name.trim() || !location.trim()) {
+            Alert.alert('Missing Info', 'Please provide a name and location.');
             return;
         }
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+        if (selectedClothIds.length === 0) {
+            Alert.alert('No Items', 'Please pack at least one item.');
+            return;
+        }
+        const time = trip?.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const day = trip?.day || new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
-        addLaundry(date, time, day, note, selectedClothIds);
+        updateTrip(tripId, name, location, date, time, day, notes, selectedClothIds);
         navigation.goBack();
     };
+
+    if (!trip) return null;
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={[styles.header, { borderBottomColor: colors.border }]}>
                 <Ionicons name="close" size={28} color={colors.text} onPress={() => navigation.goBack()} />
-                <Text style={[styles.title, { color: colors.text }]}>Add to Laundry</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Edit Trip</Text>
                 <TouchableOpacity onPress={handleSave}>
                     <Text style={[styles.saveBtn, { color: colors.primary }]}>Save</Text>
                 </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.contentContainer} keyboardShouldPersistTaps="handled">
+                <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Trip Name</Text>
+                    <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={name}
+                        onChangeText={setName}
+                        placeholder="e.g. Summer Vacation"
+                        placeholderTextColor={colors.textSecondary}
+                    />
+                </View>
+
+                <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Location</Text>
+                    <TextInput
+                        style={[styles.input, { color: colors.text }]}
+                        value={location}
+                        onChangeText={setLocation}
+                        placeholder="e.g. Hawaii"
+                        placeholderTextColor={colors.textSecondary}
+                    />
+                </View>
+
                 <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                     <Text style={[styles.label, { color: colors.textSecondary }]}>Date</Text>
                     <TouchableOpacity onPress={() => setShowPicker(true)}>
@@ -92,13 +131,14 @@ export default function AddLaundryScreen() {
                 )}
 
                 <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                    <Text style={[styles.label, { color: colors.textSecondary }]}>Note (Optional)</Text>
+                    <Text style={[styles.label, { color: colors.textSecondary }]}>Notes (Optional)</Text>
                     <TextInput
                         style={[styles.input, { color: colors.text }]}
-                        value={note}
-                        onChangeText={setNote}
-                        placeholder="e.g. Dry clean only items"
+                        value={notes}
+                        onChangeText={setNotes}
+                        placeholder="e.g. Don't forget chargers"
                         placeholderTextColor={colors.textSecondary}
+                        multiline
                     />
                 </View>
 
