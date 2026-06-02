@@ -1,37 +1,42 @@
 # Closetra
 
-Closetra is a premium, fully offline, and private wardrobe management application built for the modern fashion-conscious user. Organize your closet, design outfits, track laundry, and plan trips with a sleek, high-contrast interface—all without ever needing an internet connection or a cloud account.
+A premium, fully offline wardrobe management app. Organize your closet, build outfits, track laundry, and plan trips — all on-device with no internet or cloud account needed.
 
-## Premium Features
+## Download
 
-*   **Virtual Closet (Closet)**: Digitize your entire wardrobe with ease. Add photos, categorize items (Shirts, Pants, Shoes, etc.), and track details like brand, color, season, and notes. Items can be marked as favorites for quick access.
-*   **Outfit Architect**: Build limitless outfit combinations. Mix and match items from your closet, assign them to custom categories, and search through your saved looks. Perfect for planning your week or saving inspiration.
-*   **Intelligent Laundry Tracking**: Keep your wardrobe rotation fresh. Add items to laundry to track what's currently in the wash. Clothes in laundry are automatically badged in your closet so you know exactly what's available to wear.
-*   **Advanced Trip Planner**: Organize your packing lists for upcoming travel. Track your location, dates, and notes. Use the "Pack All" feature to batch-process your items as you prepare for your journey.
-*   **7 Premium Themes**: Personalize your experience with curated color palettes including **Classic, Ocean, Forest, Sunset, Crimson, Lavender, and Midnight**. Every theme supports both Light and Dark modes with smooth, animated transitions.
-*   **Dynamic Analytics**: Gain insights into your style. View a beautiful breakdown of your wardrobe by category with interactive charts and see real-time stats on your total items, active laundry, and planned trips.
-*   **Integrated Update System**: Stay on the latest version with the built-in "Check for Updates" feature. It fetches the latest release data directly from GitHub while keeping your data strictly on-device.
-*   **100% Offline & Private**: Your data is yours. All information and images are stored securely on your device using a local SQLite database and protected file system. No cloud login required.
-*   **Elite UI/UX**: Experience a minimalist, high-performance interface featuring smooth transitions, haptic feedback, and a consistent design language across all modules.
-*   **Backup & Restore**: Never lose your data. Export your entire database to a portable JSON file and restore it on any device using the native sharing menu.
+Get the latest version from the [GitHub Releases](https://github.com/asliadarsh/Closetra/releases/latest) page. Download the APK for Android or the appropriate build for your platform.
 
-## Technology Stack
+Once installed, the app includes a built-in **Check for Updates** feature under the More tab that fetches the latest release directly from GitHub — no manual checking needed.
 
-*   **Framework**: [React Native](https://reactnative.dev/) with [Expo SDK 54](https://expo.dev/)
-*   **Language**: TypeScript
-*   **Animation**: React Native Reanimated & LayoutAnimations
-*   **Theme Engine**: Custom ThemeContext with 7 Adaptive Palettes
-*   **State Management**: Zustand
-*   **Database**: `expo-sqlite` (Local Persistence)
-*   **Storage**: `expo-file-system` (Local Image Management)
-*   **Haptics**: `expo-haptics`
-*   **Charts**: `react-native-chart-kit`
+## Features
+
+- **Virtual Closet** — Digitize your wardrobe with photos, categories, brand, color, season tracking, and favorites.
+- **Outfit Builder** — Mix and match items into outfits with custom categories and search.
+- **Laundry Tracker** — Log laundry cycles, mark items as returned, and see what's in the wash directly from your closet.
+- **Trip Packing** — Create trips, assign clothes to pack, track progress with pack/unpack toggling.
+- **Multi-Select & Batch Actions** — Long-press to select multiple items on any tab. Delete in bulk or move to a category.
+- **Advanced Filtering** — Filter clothes by category, color, brand, and season via a bottom-sheet interface. Sort by name or date. Laundry and trips have their own filter and sort options too.
+- **8 Color Themes** — Minimal, Ocean, Forest, Sunset, Crimson, Lavender, and Midnight. All themes support Light and Dark mode.
+- **Custom Typography** — Uses Proxima Nova, Lato, and Raleway for a clean, editorial feel.
+- **Analytics** — View wardrobe stats and a category breakdown chart.
+- **Backup & Restore** — Export your data as JSON and restore on any device.
+- **100% Offline & Private** — SQLite database and local images. No data ever leaves your device.
+- **Premium UI** — Haptic feedback, smooth transitions, minimalist design.
+
+## Tech Stack
+
+- [React Native](https://reactnative.dev/) + [Expo SDK 54](https://expo.dev/)
+- TypeScript + Zustand (state) + expo-sqlite (database)
+- React Navigation (tabs + stacks)
+- expo-image-picker + expo-file-system (images)
+- react-native-chart-kit (analytics)
 
 ## Data Persistence
 
 *   **Database**: Stored locally in the SQLite document directory.
 *   **Images**: When you select an image, it is copied to a persistent `Images` folder within the app's local document directory. The database stores the local URI to ensure lightning-fast performance and offline availability.
 
+
 ## License
 
-This project is for personal use and portfolio demonstration. All rights reserved.
+*MIT license to be added.*

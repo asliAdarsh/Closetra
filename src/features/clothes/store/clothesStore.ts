@@ -12,11 +12,20 @@ interface ClothesState {
     selectedCategoryId: string | null;
     isLoading: boolean;
 
+    // Filter state
+    colorFilter: string[];
+    brandFilter: string[];
+    selectedCategories: string[];
+
     // Actions
     setSearchQuery: (query: string) => void;
     setSeasonFilter: (season: string) => void;
     setShowFavoritesOnly: (show: boolean) => void;
     setSelectedCategory: (id: string | null) => void;
+    setColorFilter: (colors: string[]) => void;
+    setBrandFilter: (brands: string[]) => void;
+    setSelectedCategories: (ids: string[]) => void;
+    clearFilters: () => void;
 
     // Data Fetching
     fetchData: () => void;
@@ -25,6 +34,8 @@ interface ClothesState {
     addCloth: (cloth: Omit<Cloth, 'id' | 'createdAt'>) => void;
     updateCloth: (id: string, updates: Partial<Omit<Cloth, 'id' | 'createdAt'>>) => void;
     deleteCloth: (id: string) => void;
+    deleteMultiple: (ids: string[]) => void;
+    moveToCategory: (ids: string[], categoryId: string) => void;
 
     addCategory: (name: string) => void;
     updateCategory: (id: string, name: string) => void;
@@ -40,10 +51,19 @@ export const useClothesStore = create<ClothesState>((set, get) => ({
     selectedCategoryId: null,
     isLoading: false,
 
+    // Filter state
+    colorFilter: [],
+    brandFilter: [],
+    selectedCategories: [],
+
     setSearchQuery: (query) => set({ searchQuery: query }),
     setSeasonFilter: (season) => set({ seasonFilter: season }),
     setShowFavoritesOnly: (show) => set({ showFavoritesOnly: show }),
     setSelectedCategory: (id) => set({ selectedCategoryId: id }),
+    setColorFilter: (colors) => set({ colorFilter: colors }),
+    setBrandFilter: (brands) => set({ brandFilter: brands }),
+    setSelectedCategories: (ids) => set({ selectedCategories: ids }),
+    clearFilters: () => set({ searchQuery: '', seasonFilter: 'All-Season', showFavoritesOnly: false, selectedCategoryId: null, colorFilter: [], brandFilter: [], selectedCategories: [] }),
 
     fetchData: () => {
         set({ isLoading: true });
@@ -68,6 +88,16 @@ export const useClothesStore = create<ClothesState>((set, get) => ({
 
     deleteCloth: (id) => {
         clothesRepository.delete(id);
+        get().fetchData();
+    },
+
+    deleteMultiple: (ids) => {
+        clothesRepository.deleteMultiple(ids);
+        get().fetchData();
+    },
+
+    moveToCategory: (ids, categoryId) => {
+        clothesRepository.moveToCategory(ids, categoryId);
         get().fetchData();
     },
 

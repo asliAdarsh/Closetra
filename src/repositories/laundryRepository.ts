@@ -71,5 +71,18 @@ export const laundryRepository = {
        WHERE l.status = 'Given'`
         );
         return items.map(i => i.clothId);
+    },
+
+    deleteMultiple: (ids: string[]): void => {
+        for (const id of ids) {
+            db.runSync('DELETE FROM LaundryItems WHERE laundryId = ?', [id]);
+            db.runSync('DELETE FROM Laundry WHERE id = ?', [id]);
+        }
+    },
+
+    markMultipleReturned: (ids: string[]): void => {
+        for (const id of ids) {
+            db.runSync("UPDATE Laundry SET status = 'Returned' WHERE id = ?", [id]);
+        }
     }
 };

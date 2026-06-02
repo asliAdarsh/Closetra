@@ -61,17 +61,16 @@ const styles = StyleSheet.create({
     },
     dialog: {
         width: '100%',
-        borderRadius: borderRadius.l,
+        borderRadius: borderRadius.xl,
         padding: spacing.l,
     },
     title: {
-        ...typography.h3,
+        ...typography.h2,
         marginBottom: spacing.s,
     },
     message: {
         ...typography.body,
         marginBottom: spacing.l,
-        lineHeight: 22,
     },
     actions: {
         flexDirection: 'row',
@@ -81,8 +80,9 @@ const styles = StyleSheet.create({
     button: {
         paddingVertical: spacing.s,
         paddingHorizontal: spacing.m,
+        borderRadius: borderRadius.m,
     },
     buttonText: {
-        ...typography.body,
+        ...typography.button,
     }
 });

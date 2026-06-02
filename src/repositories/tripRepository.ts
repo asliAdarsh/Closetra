@@ -79,5 +79,12 @@ export const tripRepository = {
     delete: (id: string): void => {
         db.runSync("DELETE FROM TripItems WHERE tripId = ?", [id]);
         db.runSync("DELETE FROM Trips WHERE id = ?", [id]);
+    },
+
+    deleteMultiple: (ids: string[]): void => {
+        for (const id of ids) {
+            db.runSync("DELETE FROM TripItems WHERE tripId = ?", [id]);
+            db.runSync("DELETE FROM Trips WHERE id = ?", [id]);
+        }
     }
 };

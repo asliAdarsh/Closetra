@@ -41,5 +41,19 @@ export const clothesRepository = {
         db.runSync('DELETE FROM TripItems WHERE clothId = ?', [id]);
         db.runSync('DELETE FROM LaundryItems WHERE clothId = ?', [id]);
         db.runSync('DELETE FROM Clothes WHERE id = ?', [id]);
+    },
+
+    deleteMultiple: (ids: string[]): void => {
+        for (const id of ids) {
+            db.runSync('DELETE FROM TripItems WHERE clothId = ?', [id]);
+            db.runSync('DELETE FROM LaundryItems WHERE clothId = ?', [id]);
+            db.runSync('DELETE FROM Clothes WHERE id = ?', [id]);
+        }
+    },
+
+    moveToCategory: (ids: string[], categoryId: string): void => {
+        for (const id of ids) {
+            db.runSync('UPDATE Clothes SET categoryId = ? WHERE id = ?', [categoryId, id]);
+        }
     }
 };

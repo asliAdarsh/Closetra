@@ -1,5 +1,5 @@
 {
-  "latestVersion": "2.0.0",
+  "latestVersion": "2.1.0",
   "downloadUrl": "https://github.com/asliadarsh/Closetra/releases/latest",
-  "releaseNotes": "v2.0: Added Premium Themes, Outfit Categories, and Update Tracking."
+  "releaseNotes": "v2.1: Added multi-select, filter bottom sheet, sort, new typography, and Minimal theme."
 }

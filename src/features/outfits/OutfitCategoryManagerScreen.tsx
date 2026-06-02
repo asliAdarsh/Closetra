@@ -87,16 +87,16 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: spacing.l,
-        borderBottomWidth: 1,
+        borderBottomWidth: StyleSheet.hairlineWidth,
     },
-    title: { ...typography.h3 },
+    title: { ...typography.h2 },
     addSection: {
         flexDirection: 'row',
         padding: spacing.l,
         gap: spacing.m,
     },
     input: {
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         borderRadius: borderRadius.m,
         paddingHorizontal: spacing.m,
         height: 44,
@@ -109,8 +109,7 @@ const styles = StyleSheet.create({
         borderRadius: borderRadius.m,
     },
     addBtnText: {
-        ...typography.body,
-        fontWeight: 'bold',
+        ...typography.button,
     },
     list: { paddingHorizontal: spacing.l, paddingBottom: spacing.xxl },
     card: {
@@ -119,10 +118,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: spacing.m,
         borderRadius: borderRadius.m,
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         marginBottom: spacing.s,
     },
-    catName: { ...typography.body, fontWeight: '500', flex: 1 },
+    catName: { ...typography.body, flex: 1 },
     actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.s },
     actionBtn: { padding: spacing.xs },
 });

@@ -57,21 +57,21 @@ const styles = StyleSheet.create({
         paddingBottom: spacing.xxl,
     },
     title: {
-        ...typography.h3,
+        ...typography.h2,
         marginBottom: spacing.l,
         textAlign: 'center',
     },
     option: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: spacing.m,
+        paddingVertical: spacing.l,
     },
     optionText: {
         ...typography.body,
         marginLeft: spacing.m,
     },
     divider: {
-        height: 1,
+        height: StyleSheet.hairlineWidth,
         width: '100%',
     }
 });

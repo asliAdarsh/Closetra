@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start'
     },
     label: {
-        ...typography.body,
-        fontWeight: '500'
+        ...typography.chip,
     }
 });

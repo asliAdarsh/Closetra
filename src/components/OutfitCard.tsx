@@ -10,10 +10,11 @@ interface Props {
     outfit: Outfit;
     items: Cloth[];
     onPress: () => void;
+    onLongPress?: () => void;
     onToggleFavorite: (id: string, isFav: boolean) => void;
 }
 
-export const OutfitCard: React.FC<Props> = ({ outfit, items, onPress, onToggleFavorite }) => {
+export const OutfitCard: React.FC<Props> = ({ outfit, items, onPress, onLongPress, onToggleFavorite }) => {
     const { colors } = useTheme();
 
     // Take max 4 items to display in a 2x2 grid for the thumbnail
@@ -23,6 +24,8 @@ export const OutfitCard: React.FC<Props> = ({ outfit, items, onPress, onToggleFa
         <TouchableOpacity
             style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={onPress}
+            onLongPress={onLongPress}
+            delayLongPress={400}
             activeOpacity={0.8}
         >
             <View style={styles.gridContainer}>
@@ -76,17 +79,13 @@ export const OutfitCard: React.FC<Props> = ({ outfit, items, onPress, onToggleFa
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: borderRadius.xl,
-        borderWidth: 1,
+        borderRadius: borderRadius.l,
+        borderWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
         position: 'relative',
         height: 200,
         justifyContent: 'space-between',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
+        backgroundColor: 'transparent',
     },
     gridContainer: {
         flex: 1,
@@ -117,16 +116,15 @@ const styles = StyleSheet.create({
     footer: {
         padding: spacing.s,
         paddingHorizontal: spacing.m,
-        borderTopWidth: 1,
+        borderTopWidth: StyleSheet.hairlineWidth,
         borderTopColor: 'rgba(0,0,0,0.05)',
     },
     name: {
         ...typography.body,
-        fontWeight: 'bold',
     },
     count: {
-        ...typography.caption,
-        marginTop: 2,
+        ...typography.small,
+        marginTop: spacing.xxs,
     },
     favBtn: {
         position: 'absolute',
@@ -134,9 +132,6 @@ const styles = StyleSheet.create({
         right: spacing.s,
         padding: spacing.xs,
         borderRadius: borderRadius.round,
-        shadowColor: '#000',
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        backgroundColor: 'rgba(255,255,255,0.9)',
     }
 });

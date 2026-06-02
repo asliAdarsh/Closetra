@@ -5,6 +5,7 @@ import { tripRepository } from '../../../repositories/tripRepository';
 interface TripsState {
     history: Trip[];
     isLoading: boolean;
+    locationQuery: string;
 
     fetchData: () => void;
     addTrip: (name: string, location: string, date: string, time: string, day: string, notes: string, clothIds: string[]) => void;
@@ -15,11 +16,15 @@ interface TripsState {
     uncollectAll: (tripId: string) => void;
     getTripItems: (id: string) => TripItem[];
     deleteTrip: (id: string) => void;
+    deleteMultiple: (ids: string[]) => void;
+    setLocationQuery: (query: string) => void;
+    clearFilters: () => void;
 }
 
 export const useTripsStore = create<TripsState>((set, get) => ({
     history: [],
     isLoading: false,
+    locationQuery: '',
 
     fetchData: () => {
         set({ isLoading: true });
@@ -68,5 +73,13 @@ export const useTripsStore = create<TripsState>((set, get) => ({
     deleteTrip: (id) => {
         tripRepository.delete(id);
         get().fetchData();
-    }
+    },
+
+    deleteMultiple: (ids) => {
+        tripRepository.deleteMultiple(ids);
+        get().fetchData();
+    },
+
+    setLocationQuery: (query) => set({ locationQuery: query }),
+    clearFilters: () => set({ locationQuery: '' })
 }));

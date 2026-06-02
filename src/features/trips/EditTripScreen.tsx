@@ -198,10 +198,10 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: spacing.l,
-        borderBottomWidth: 1,
+        borderBottomWidth: StyleSheet.hairlineWidth,
     },
-    title: { ...typography.h3 },
-    saveBtn: { ...typography.h3, fontWeight: 'bold' },
+    title: { ...typography.h2 },
+    saveBtn: { ...typography.button, fontWeight: '600' },
     contentContainer: {
         padding: spacing.l,
         paddingBottom: 100,
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     inputContainer: {
         padding: spacing.m,
         borderRadius: borderRadius.m,
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         marginBottom: spacing.l,
     },
     label: {
@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
         marginBottom: spacing.m,
         marginTop: spacing.s,
     },
-    sectionTitle: { ...typography.h3 },
-    countText: { ...typography.body, fontWeight: 'bold' },
+    sectionTitle: { ...typography.h2 },
+    countText: { ...typography.chip },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -241,9 +241,9 @@ const styles = StyleSheet.create({
     },
     searchInput: {
         flex: 1,
-        height: 48,
-        borderWidth: 1,
-        borderRadius: 24,
+        height: 44,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderRadius: borderRadius.m,
         paddingLeft: 40,
         paddingRight: spacing.m,
     },
@@ -267,10 +267,5 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
     }
 });

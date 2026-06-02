@@ -201,7 +201,7 @@ export default function AddClothScreen({ route }: any) {
 
                 <View style={styles.switchRow}>
                     <Text style={[styles.label, { color: colors.text, marginTop: 0, marginBottom: 0 }]}>Mark as Favorite</Text>
-                    <Switch value={isFavorite} onValueChange={setIsFavorite} trackColor={{ true: colors.primary }} />
+                    <Switch value={isFavorite} onValueChange={setIsFavorite} trackColor={{ true: colors.primary }} thumbColor={isFavorite ? colors.primary : colors.textTertiary} />
                 </View>
 
                 {existingCloth && (
@@ -258,25 +258,25 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: spacing.l,
-        borderBottomWidth: 1,
+        borderBottomWidth: StyleSheet.hairlineWidth,
     },
-    title: { ...typography.h3 },
-    saveBtn: { ...typography.h3, fontWeight: 'bold' },
+    title: { ...typography.h2 },
+    saveBtn: { ...typography.button, fontWeight: '600' },
     form: { padding: spacing.l, paddingBottom: 100 },
     imageContainer: {
         width: '100%',
         aspectRatio: 1,
         borderRadius: borderRadius.l,
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         borderStyle: 'dashed',
         overflow: 'hidden',
         marginBottom: spacing.l,
     },
     image: { width: '100%', height: '100%' },
     imagePlaceholder: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    label: { ...typography.body, fontWeight: 'bold', marginBottom: spacing.s, marginTop: spacing.m },
+    label: { ...typography.caption, fontWeight: '600', marginBottom: spacing.s, marginTop: spacing.m },
     input: {
-        borderWidth: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         borderRadius: borderRadius.m,
         padding: spacing.m,
         ...typography.body,
@@ -299,14 +299,13 @@ const styles = StyleSheet.create({
         padding: spacing.m,
     },
     deleteText: {
-        ...typography.body,
-        fontWeight: 'bold',
+        ...typography.button,
         marginLeft: spacing.s,
     },
     relatedSection: {
         marginTop: spacing.xl,
         paddingTop: spacing.l,
-        borderTopWidth: 1,
+        borderTopWidth: StyleSheet.hairlineWidth,
         borderTopColor: 'rgba(0,0,0,0.05)',
     },
     relatedOutfitsRow: {

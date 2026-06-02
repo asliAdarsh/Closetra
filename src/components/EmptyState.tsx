@@ -36,20 +36,20 @@ const styles = StyleSheet.create({
         marginTop: spacing.xxl,
     },
     iconContainer: {
-        width: 96,
-        height: 96,
-        borderRadius: 48,
+        width: 88,
+        height: 88,
+        borderRadius: 44,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: spacing.l,
     },
     message: {
-        ...typography.h3,
+        ...typography.h2,
         textAlign: 'center',
         marginBottom: spacing.xs,
     },
     subMessage: {
-        ...typography.body,
+        ...typography.caption,
         textAlign: 'center',
     }
 });

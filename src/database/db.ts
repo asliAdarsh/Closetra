@@ -160,7 +160,7 @@ function seedDefaultSettings(db: SQLite.SQLiteDatabase) {
     db.runSync(
       `INSERT INTO AppSettings (id, theme, animationsEnabled, gridColumns, defaultSeason, defaultCategoryId, autoReturnDays, themeName) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      ['settings', 'System', 1, 2, 'All-Season', '', 7, 'Classic']
+      ['settings', 'System', 1, 2, 'All-Season', '', 7, 'Minimal']
     );
   }
 }
