@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,6 +32,7 @@ export default function AppNavigator() {
         <NavigationContainer theme={navigationTheme}>
             <Tab.Navigator
                 screenOptions={({ route }) => ({
+                    tabBarShowLabel: false,
                     tabBarIcon: ({ focused, color, size }) => {
                         let iconName: keyof typeof Ionicons.glyphMap = 'shirt';
 
@@ -53,11 +55,12 @@ export default function AppNavigator() {
                     tabBarStyle: {
                         backgroundColor: colors.surface,
                         borderTopColor: colors.border,
+                        borderTopWidth: StyleSheet.hairlineWidth,
                     },
                     headerShown: false,
                 })}
             >
-                <Tab.Screen name="Clothes" component={ClothesNavigator} options={{ tabBarLabel: 'Closet' }} />
+                <Tab.Screen name="Clothes" component={ClothesNavigator} />
                 <Tab.Screen name="Laundry" component={LaundryNavigator} />
                 <Tab.Screen name="Trips" component={TripsNavigator} />
                 <Tab.Screen name="Outfits" component={OutfitsNavigator} />

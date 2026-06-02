@@ -92,7 +92,7 @@ export default function MoreScreen() {
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.header}>
-                <Text style={[styles.title, { color: colors.text }]}>Menu</Text>
+                <Text style={[styles.title, { color: colors.text }]}>More</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.scroll}>

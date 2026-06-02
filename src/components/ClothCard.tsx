@@ -9,6 +9,7 @@ import { typography } from '../theme/typography';
 interface ClothCardProps {
     cloth: Cloth;
     onPress: () => void;
+    onLongPress?: () => void;
     onToggleFavorite: (id: string, isFav: boolean) => void;
     isInLaundry?: boolean;
     isInTrip?: boolean;
@@ -16,7 +17,7 @@ interface ClothCardProps {
 }
 
 export const ClothCard: React.FC<ClothCardProps> = ({
-    cloth, onPress, onToggleFavorite, isInLaundry, isInTrip, hideFavorite
+    cloth, onPress, onLongPress, onToggleFavorite, isInLaundry, isInTrip, hideFavorite
 }) => {
     const { colors } = useTheme();
     const [imageError, setImageError] = React.useState(false);
@@ -25,6 +26,8 @@ export const ClothCard: React.FC<ClothCardProps> = ({
         <TouchableOpacity
             style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
             onPress={onPress}
+            onLongPress={onLongPress}
+            delayLongPress={400}
             activeOpacity={0.7}
         >
             {imageError ? (
@@ -81,16 +84,12 @@ export const ClothCard: React.FC<ClothCardProps> = ({
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: borderRadius.xl,
-        borderWidth: 1,
+        borderRadius: borderRadius.l,
+        borderWidth: StyleSheet.hairlineWidth,
         overflow: 'hidden',
         marginBottom: spacing.m,
         flex: 1,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-        elevation: 2,
+        backgroundColor: 'transparent',
     },
     image: {
         width: '100%',
@@ -105,43 +104,40 @@ const styles = StyleSheet.create({
         padding: spacing.m,
     },
     fallbackText: {
-        ...typography.body,
+        ...typography.caption,
         textAlign: 'center',
-        fontWeight: 'bold',
     },
     info: {
         padding: spacing.s,
     },
     brand: {
-        ...typography.small,
+        ...typography.body,
         marginBottom: 2,
     },
     colorText: {
-        ...typography.caption,
-        fontWeight: '500',
+        ...typography.small,
     },
     badges: {
         flexDirection: 'row',
-        marginTop: 4,
-        gap: 4,
+        marginTop: spacing.xs,
+        gap: spacing.xs,
         flexWrap: 'wrap',
     },
     badge: {
-        paddingHorizontal: 6,
-        paddingVertical: 2,
+        paddingHorizontal: spacing.s,
+        paddingVertical: spacing.xxs,
         borderRadius: borderRadius.s,
     },
     badgeText: {
         ...typography.small,
         fontSize: 10,
-        fontWeight: 'bold',
     },
     favoriteBtn: {
         position: 'absolute',
         top: spacing.s,
         right: spacing.s,
-        backgroundColor: 'rgba(255,255,255,0.8)',
+        backgroundColor: 'rgba(255,255,255,0.9)',
         borderRadius: borderRadius.round,
-        padding: 4,
+        padding: spacing.xs,
     }
 });

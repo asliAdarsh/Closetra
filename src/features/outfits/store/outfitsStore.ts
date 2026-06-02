@@ -10,6 +10,7 @@ interface OutfitsState {
     searchQuery: string;
     showFavoritesOnly: boolean;
     isLoading: boolean;
+    selectedCategories: string[];
 
     fetchData: () => void;
     addOutfit: (name: string, notes: string, clothIds: string[], categoryId?: string) => void;
@@ -17,10 +18,14 @@ interface OutfitsState {
     toggleFavorite: (id: string, isFavorite: boolean) => void;
     getOutfitItems: (id: string) => OutfitItem[];
     deleteOutfit: (id: string) => void;
+    deleteMultiple: (ids: string[]) => void;
+    moveToCategory: (ids: string[], categoryId: string) => void;
 
     setSelectedOutfitCategory: (id: string | null) => void;
     setSearchQuery: (query: string) => void;
     setShowFavoritesOnly: (show: boolean) => void;
+    setSelectedCategories: (ids: string[]) => void;
+    clearFilters: () => void;
     addOutfitCategory: (name: string, icon: string) => void;
     deleteOutfitCategory: (id: string) => void;
 }
@@ -32,6 +37,7 @@ export const useOutfitsStore = create<OutfitsState>((set, get) => ({
     searchQuery: '',
     showFavoritesOnly: false,
     isLoading: false,
+    selectedCategories: [],
 
     fetchData: () => {
         set({ isLoading: true });
@@ -68,9 +74,21 @@ export const useOutfitsStore = create<OutfitsState>((set, get) => ({
         get().fetchData();
     },
 
+    deleteMultiple: (ids) => {
+        outfitRepository.deleteMultiple(ids);
+        get().fetchData();
+    },
+
+    moveToCategory: (ids, categoryId) => {
+        outfitRepository.moveToCategory(ids, categoryId);
+        get().fetchData();
+    },
+
     setSelectedOutfitCategory: (id) => set({ selectedOutfitCategoryId: id }),
     setSearchQuery: (query) => set({ searchQuery: query }),
     setShowFavoritesOnly: (show) => set({ showFavoritesOnly: show }),
+    setSelectedCategories: (ids) => set({ selectedCategories: ids }),
+    clearFilters: () => set({ searchQuery: '', showFavoritesOnly: false, selectedOutfitCategoryId: null, selectedCategories: [] }),
 
     addOutfitCategory: (name, icon) => {
         outfitCategoryRepository.add(name, icon);

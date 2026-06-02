@@ -96,6 +96,7 @@ export default function TripDetailScreen({ route }: any) {
                         value={allPacked}
                         onValueChange={handleCollectionToggle}
                         trackColor={{ false: colors.border, true: colors.primary }}
+                        thumbColor={allPacked ? colors.primary : colors.textTertiary}
                     />
                 </View>
             </View>
@@ -141,19 +142,19 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: spacing.l,
-        borderBottomWidth: 1,
+        borderBottomWidth: StyleSheet.hairlineWidth,
     },
     headerRight: {
         flexDirection: 'row',
         alignItems: 'center',
     },
-    title: { ...typography.h3, flex: 1, textAlign: 'center', paddingHorizontal: spacing.s },
+    title: { ...typography.h2, flex: 1, textAlign: 'center', paddingHorizontal: spacing.s },
     infoBox: { padding: spacing.l, alignItems: 'center' },
-    locText: { ...typography.body, marginBottom: spacing.s },
-    notesText: { ...typography.caption, marginBottom: spacing.m, textAlign: 'center', fontStyle: 'italic' },
+    locText: { ...typography.caption, marginBottom: spacing.s },
+    notesText: { ...typography.small, marginBottom: spacing.m, textAlign: 'center', fontStyle: 'italic' },
     progressContainer: { width: '100%', alignItems: 'center', marginTop: spacing.s },
-    progressText: { ...typography.body, fontWeight: 'bold', marginBottom: spacing.s },
-    progressBarBg: { width: '100%', height: 8, borderRadius: 4, overflow: 'hidden' },
+    progressText: { ...typography.body, marginBottom: spacing.s },
+    progressBarBg: { width: '100%', height: 6, borderRadius: 3, overflow: 'hidden' },
     progressBarFill: { height: '100%' },
     collectionToggle: {
         width: '100%',
@@ -162,7 +163,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: spacing.m,
         paddingTop: spacing.m,
-        borderTopWidth: 1,
+        borderTopWidth: StyleSheet.hairlineWidth,
     },
     grid: { paddingHorizontal: spacing.l, paddingBottom: 100 },
     row: { gap: spacing.m },
@@ -172,8 +173,8 @@ const styles = StyleSheet.create({
         top: spacing.s,
         left: spacing.s,
         paddingHorizontal: spacing.s,
-        paddingVertical: 4,
+        paddingVertical: spacing.xxs,
         borderRadius: borderRadius.s,
     },
-    packBadgeText: { ...typography.small, fontWeight: 'bold' }
+    packBadgeText: { ...typography.small }
 });

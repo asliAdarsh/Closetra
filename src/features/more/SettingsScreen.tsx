@@ -9,7 +9,7 @@ import { typography } from '../../theme/typography';
 import { ThemeName, themes } from '../../theme/colors';
 
 const THEME_OPTIONS: Array<{ name: ThemeName; label: string; preview: string }> = [
-    { name: 'Classic', label: 'Classic', preview: '#000000' },
+    { name: 'Minimal', label: 'Minimal', preview: '#1A1A1A' },
     { name: 'Ocean', label: 'Ocean', preview: '#0A6DC4' },
     { name: 'Forest', label: 'Forest', preview: '#2D6A4F' },
     { name: 'Sunset', label: 'Sunset', preview: '#F57C00' },
@@ -50,6 +50,7 @@ export default function SettingsScreen() {
                         value={isDark}
                         onValueChange={toggleTheme}
                         trackColor={{ true: colors.primary }}
+                        thumbColor={colors.primary}
                     />
                 </View>
 
