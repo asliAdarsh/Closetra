@@ -37,6 +37,6 @@ Once installed, the app includes a built-in **Check for Updates** feature under 
 *   **Images**: When you select an image, it is copied to a persistent `Images` folder within the app's local document directory. The database stores the local URI to ensure lightning-fast performance and offline availability.
 
 
-## License
+## 📜 License
 
-*MIT license to be added.*
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
